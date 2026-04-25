@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+header {
+  text-align: center;
+  padding: 20px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+/* LAYOUT */
+.container {
+  display: flex;
+  height: calc(100vh - 80px);
+}
+
+/* PRODUTOS */
+.produtos {
+  width: 40%;
+  padding: 20px;
+}
+
+.produto {
+  width: 100%;
+  padding: 15px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+
+/* CONTROLE */
+.controle {
+  width: 60%;
+  padding: 20px;
+}
+
+input {
+  padding: 10px;
+  font-size: 16px;
+  width: 100px;
+}
+
+button {
+  padding: 12px 20px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+/* 🎟️ ESTILO DO TICKET */
+.ticket {
+  font-family: monospace;
+  font-size: 28px;
+  text-align: center;
+  margin-top: 100px;
+
+  /* 🔥 ESSENCIAL */
+  page-break-after: always;
+  break-after: page;
+}
+</style>
+</head>
+
+<body>
+
+
+<div class="container">
+
+  <!-- PRODUTOS -->
+  <div class="produtos">
+    <button class="produto" onclick="selecionar('CERVEJA')">Cerveja</button>
+    <button class="produto" onclick="selecionar('ÁGUA')">Água</button>
+    <button class="produto" onclick="selecionar('REFRIGERANTE')">Refrigerante</button>
+    <button class="produto" onclick="selecionar('ESPETINHO')">Espetinho</button>
+    <button class="produto" onclick="selecionar('SALGADINHO')">Salgadinho</button>
+  </div>
+
+  <!-- CONTROLE -->
+  <div class="controle">
+
+    <h2 id="produtoSelecionado">Selecione um produto</h2>
+
+    Quantidade:
+    <br>
+    <input type="number" id="quantidade" min="1" value="1">
+
+    <br>
+
+    <button onclick="imprimir()">IMPRIMIR</button>
+
+  </div>
+
+</div>
+
+<script>
+let produto = "";
+
+function selecionar(nome) {
+  produto = nome;
+  document.getElementById("produtoSelecionado").innerText = "Produto: " + nome;
+}
+
+function imprimir() {
+  const qtd = parseInt(document.getElementById("quantidade").value);
+
+  if (!produto) {
+    alert("Selecione um produto!");
+    return;
+  }
+
+  let html = "";
+
+  // 🔥 UM TICKET POR "PÁGINA"
+  for (let i = 0; i < qtd; i++) {
+    html += `<div class="ticket">${produto}</div>`;
+  }
+
+  const win = window.open('', '', 'width=300,height=600');
+
+  win.document.write(`
+    <html>
+    <head>
+      <title>Impressão</title>
+      <style>
+        body { margin: 0; }
+        .ticket {
+          font-family: monospace;
+          font-size: 28px;
+          text-align: center;
+          margin-top: 100px;
+          page-break-after: always;
+          break-after: page;
+        }
+      </style>
+    </head>
+    <body>
+      ${html}
+    </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.print();
+}
+</script>
+
+</body>
+</html>
