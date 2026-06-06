@@ -1,156 +1,456 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bar do Ginásio - Tickets</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-/* HEADER */
-header {
-  text-align: center;
-  padding: 20px;
-  font-size: 28px;
-  font-weight: bold;
+body{
+    font-family:Arial, sans-serif;
+    background:#f4f4f4;
 }
 
-/* LAYOUT */
-.container {
-  display: flex;
-  height: calc(100vh - 80px);
+header{
+    background:#5A0F1C;
+    color:#D4AF37;
+    padding:15px;
+    text-align:center;
 }
 
-/* PRODUTOS */
-.produtos {
-  width: 40%;
-  padding: 20px;
+.container{
+    display:flex;
+    height:calc(100vh - 70px);
 }
 
-.produto {
-  width: 100%;
-  padding: 15px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  font-size: 16px;
+.left-panel{
+    width:60%;
+    padding:20px;
+    overflow-y:auto;
 }
 
-
-/* CONTROLE */
-.controle {
-  width: 60%;
-  padding: 20px;
+.right-panel{
+    width:40%;
+    background:white;
+    padding:20px;
+    border-left:2px solid #ddd;
 }
 
-input {
-  padding: 10px;
-  font-size: 16px;
-  width: 100px;
+#search{
+    width:100%;
+    padding:12px;
+    margin-bottom:20px;
+    font-size:16px;
+    border:1px solid #ccc;
+    border-radius:8px;
 }
 
-button {
-  padding: 12px 20px;
-  margin-top: 10px;
-  cursor: pointer;
+.product{
+    background:white;
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:10px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-/* 🎟️ ESTILO DO TICKET */
-.ticket {
-  font-family: monospace;
-  font-size: 28px;
-  text-align: center;
-  margin-top: 100px;
-
-  /* 🔥 ESSENCIAL */
-  page-break-after: always;
-  break-after: page;
+.product-info{
+    flex:1;
 }
+
+.controls{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.controls button{
+    width:35px;
+    height:35px;
+    border:none;
+    border-radius:5px;
+    cursor:pointer;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.minus{
+    background:#ccc;
+}
+
+.plus{
+    background:#D4AF37;
+    color:white;
+}
+
+.item-cart{
+    padding:10px 0;
+    border-bottom:1px solid #eee;
+}
+
+.total{
+    margin-top:20px;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.buttons{
+    margin-top:20px;
+    display:flex;
+    gap:10px;
+}
+
+.buttons button{
+    flex:1;
+    padding:15px;
+    border:none;
+    cursor:pointer;
+    font-size:16px;
+    border-radius:8px;
+}
+
+.clear-btn{
+    background:#999;
+    color:white;
+}
+
+.print-btn{
+    background:#5A0F1C;
+    color:white;
+}
+
 </style>
 </head>
 
 <body>
 
+<header>
+    <h1>Bar do Ginásio</h1>
+</header>
 
 <div class="container">
 
-  <!-- PRODUTOS -->
-  <div class="produtos">
-    <button class="produto" onclick="selecionar('CERVEJA')">Cerveja</button>
-    <button class="produto" onclick="selecionar('ÁGUA')">Água</button>
-    <button class="produto" onclick="selecionar('REFRIGERANTE')">Refrigerante</button>
-    <button class="produto" onclick="selecionar('ESPETINHO')">Espetinho</button>
-    <button class="produto" onclick="selecionar('SALGADINHO')">Salgadinho</button>
-  </div>
+    <div class="left-panel">
 
-  <!-- CONTROLE -->
-  <div class="controle">
+        <input
+            type="text"
+            id="search"
+            placeholder="Pesquisar produto..."
+            onkeyup="filtrarProdutos()">
 
-    <h2 id="produtoSelecionado">Selecione um produto</h2>
+        <div id="products"></div>
 
-    Quantidade:
-    <br>
-    <input type="number" id="quantidade" min="1" value="1">
+    </div>
 
-    <br>
+    <div class="right-panel">
 
-    <button onclick="imprimir()">IMPRIMIR</button>
+        <h2>Pedido Atual</h2>
 
-  </div>
+        <br>
+
+        <div id="cart"></div>
+
+        <div class="total">
+            Total: R$ <span id="total">0.00</span>
+        </div>
+
+        <div class="buttons">
+            <button
+                class="clear-btn"
+                onclick="limparPedido()">
+                Limpar
+            </button>
+
+            <button
+                class="print-btn"
+                onclick="imprimirTickets()">
+                Imprimir e Limpar
+            </button>
+        </div>
+
+    </div>
 
 </div>
 
 <script>
-let produto = "";
 
-function selecionar(nome) {
-  produto = nome;
-  document.getElementById("produtoSelecionado").innerText = "Produto: " + nome;
+const produtos = [
+
+{nome:"Cerveja Lata",preco:7},
+{nome:"Heineken Lata",preco:10},
+{nome:"Refrigerante Lata",preco:7},
+{nome:"Água 500ml",preco:4},
+{nome:"Água 1,5L",preco:8},
+{nome:"Energético",preco:10},
+{nome:"Red Bull",preco:15},
+{nome:"Suco/chocolate",preco:7},
+{nome:"Espetinho",preco:10},
+{nome:"Pastel",preco:8},
+{nome:"Pastel Assado",preco:10},
+{nome:"Bolinho",preco:8},
+{nome:"Bauru",preco:10},
+{nome:"Coxinha",preco:8},
+{nome:"Pão de Batata",preco:10},
+{nome:"Mini Pizza",preco:10},
+{nome:"Pastel Assado",preco:10},
+{nome:"Churros",preco:5},
+{nome:"Almoço",preco:20},
+{nome:"Gatorade",preco:10},
+{nome:"Campari",preco:10},
+{nome:"Smirnoff",preco:8},
+{nome:"Martini",preco:8},
+{nome:"Dreher",preco:6},
+{nome:"Drurys",preco:8},
+{nome:"Natu",preco:8},
+{nome:"Cavalinho",preco:10},
+{nome:"Martini",preco:8},
+{nome:"Coco Blanc",preco:8},
+{nome:"Chopp 400ml",preco:10},
+{nome:"Chopp 1 Litro",preco:20}
+{nome:"Recarga Chopp",preco:8},
+
+];
+
+const carrinho = {};
+
+function renderProdutos(lista = produtos){
+
+    const div = document.getElementById("products");
+
+    div.innerHTML = "";
+
+    lista.forEach(produto => {
+
+        const qtd = carrinho[produto.nome]?.qtd || 0;
+
+        div.innerHTML += `
+        <div class="product">
+
+            <div class="product-info">
+                <strong>${produto.nome}</strong>
+                <br>
+                R$ ${produto.preco.toFixed(2)}
+            </div>
+
+            <div class="controls">
+
+                <button
+                    class="minus"
+                    onclick="alterarQtd('${produto.nome}',-1)">
+                    -
+                </button>
+
+                <span>${qtd}</span>
+
+                <button
+                    class="plus"
+                    onclick="alterarQtd('${produto.nome}',1)">
+                    +
+                </button>
+
+            </div>
+
+        </div>
+        `;
+    });
+
 }
 
-function imprimir() {
-  const qtd = parseInt(document.getElementById("quantidade").value);
+function alterarQtd(nome, delta){
 
-  if (!produto) {
-    alert("Selecione um produto!");
-    return;
-  }
+    const produto = produtos.find(
+        p => p.nome === nome
+    );
 
-  let html = "";
+    if(!carrinho[nome]){
+        carrinho[nome] = {
+            nome:produto.nome,
+            preco:produto.preco,
+            qtd:0
+        };
+    }
 
-  // 🔥 UM TICKET POR "PÁGINA"
-  for (let i = 0; i < qtd; i++) {
-    html += `<div class="ticket">${produto}</div>`;
-  }
+    carrinho[nome].qtd += delta;
 
-  const win = window.open('', '', 'width=300,height=600');
+    if(carrinho[nome].qtd <= 0){
+        delete carrinho[nome];
+    }
 
-  win.document.write(`
-    <html>
-    <head>
-      <title>Impressão</title>
-      <style>
-        body { margin: 0; }
-        .ticket {
-          font-family: monospace;
-          font-size: 28px;
-          text-align: center;
-          margin-top: 100px;
-          page-break-after: always;
-          break-after: page;
+    atualizarCarrinho();
+    renderProdutos(filtrarLista());
+
+}
+
+function atualizarCarrinho(){
+
+    const cart = document.getElementById("cart");
+
+    let total = 0;
+
+    cart.innerHTML = "";
+
+    Object.values(carrinho).forEach(item => {
+
+        total += item.preco * item.qtd;
+
+        cart.innerHTML += `
+        <div class="item-cart">
+            <strong>${item.qtd}x</strong>
+            ${item.nome}
+            <br>
+            R$ ${(item.preco * item.qtd).toFixed(2)}
+        </div>
+        `;
+    });
+
+    document.getElementById("total")
+        .innerText = total.toFixed(2);
+
+}
+
+function filtrarLista(){
+
+    const termo =
+        document.getElementById("search")
+        .value
+        .toLowerCase();
+
+    return produtos.filter(produto =>
+        produto.nome
+        .toLowerCase()
+        .includes(termo)
+    );
+
+}
+
+function filtrarProdutos(){
+    renderProdutos(filtrarLista());
+}
+
+function limparPedido(){
+
+    for(let item in carrinho){
+        delete carrinho[item];
+    }
+
+    atualizarCarrinho();
+    renderProdutos(filtrarLista());
+
+}
+
+function imprimirTickets(){
+
+    if(Object.keys(carrinho).length === 0){
+
+        alert("Nenhum item selecionado");
+
+        return;
+    }
+
+    let html = "";
+
+    Object.values(carrinho).forEach(item => {
+
+        for(let i = 0; i < item.qtd; i++){
+
+            html += `
+            <div class="ticket">
+                <div class="nome">
+                    ${item.nome.toUpperCase()}
+                </div>
+
+                <div class="preco">
+                    R$ ${item.preco.toFixed(2)}
+                </div>
+            </div>
+            `;
         }
-      </style>
-    </head>
-    <body>
-      ${html}
-    </body>
-    </html>
-  `);
 
-  win.document.close();
-  win.print();
+    });
+
+    const win = window.open("");
+
+    win.document.write(`
+    <html>
+
+    <head>
+
+    <style>
+
+    @page{
+    size: A4 landscape;
+    margin:0;
 }
+
+html, body{
+    margin:0;
+    padding:0;
+    width:100%;
+    height:100%;
+}
+
+.ticket{
+
+    width:100vw;
+    height:100vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+
+    page-break-after:always;
+    break-after:page;
+}
+
+.nome{
+    font-size:48px;
+    font-weight:bold;
+}
+
+.preco{
+    font-size:32px;
+    margin-top:20px;
+}
+
+    </style>
+
+    </head>
+
+    <body>
+
+    ${html}
+
+    </body>
+
+    </html>
+    `);
+
+    win.document.close();
+
+    win.print();
+
+    limparPedido();
+
+}
+
+renderProdutos();
+
 </script>
 
 </body>
